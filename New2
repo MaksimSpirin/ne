@@ -1,0 +1,29 @@
+from sklearn.datasets import load_iris
+from sklearn.tree import DecisionTreeClassifier
+from sklearn.model_selection import GridSearchCV
+from sklearn.model_selection import train_test_split
+
+# Загрузка данных
+iris = load_iris()
+X = iris.data
+y = iris.target
+
+# Разделение данных на обучающий и тестовый наборы
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+
+# Определение параметров для Grid Search
+parameters = {
+    'criterion': ['gini', 'entropy'],
+    'max_depth': [1, 2],
+    'min_samples_split': [2, 5, 10]
+}
+# Создание модели Decision Tree Classifier
+dt_classifier = DecisionTreeClassifier()
+
+# Grid Search для поиска наилучших параметров
+grid_search = GridSearchCV(dt_classifier, parameters, cv=5)
+grid_search.fit(X_train, y_train)
+
+# Вывод наилучших параметров и оценки accuracy
+print("Наилучшие параметры:", grid_search.best_params_)
+print("Оценка accuracy на тестовой выборке с наилучшими параметрами:", grid_search.best_score_)
