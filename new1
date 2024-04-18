@@ -1,0 +1,58 @@
+import pandas as pd
+from sklearn.model_selection import train_test_split
+from sklearn.preprocessing import StandardScaler, LabelEncoder
+from sklearn.linear_model import LogisticRegression
+from sklearn.neighbors import KNeighborsClassifier
+from sklearn.metrics import f1_score
+
+# Загрузка данных
+data = pd.read_csv('titanic.csv')
+
+# Удалим ненужные столбцы
+data.drop(['Name', 'Ticket', 'Cabin'], axis=1, inplace=True)
+
+# Заполним пропущенные значения средними
+data['Age'].fillna(data['Age'].mean(), inplace=True)
+data['Embarked'].fillna(data['Embarked'].mode()[0], inplace=True)
+
+# Преобразуем категориальные признаки в числовые
+label_encoder = LabelEncoder()
+data['Gender'] = label_encoder.fit_transform(data['Gender'])
+data['Embarked'] = label_encoder.fit_transform(data['Embarked'])
+
+# Нормализуем данные
+scaler = StandardScaler()
+data[['Age', 'Fare']] = scaler.fit_transform(data[['Age', 'Fare']])
+
+# Разделим данные на признаки и целевую переменную
+X = data.drop('Survived', axis=1)
+y = data['Survived']
+
+# Разделим данные на обучающий и тестовый наборы
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+
+# Логистическая регрессия
+log_reg_model = LogisticRegression()
+log_reg_model.fit(X_train, y_train)
+log_reg_predictions = log_reg_model.predict(X_test)
+f1_log_reg = f1_score(y_test, log_reg_predictions)
+
+# Метод ближайших соседей
+knn_model = KNeighborsClassifier()
+knn_model.fit(X_train, y_train)
+knn_predictions = knn_model.predict(X_test)
+f1_knn = f1_score(y_test, knn_predictions)
+
+print("Значения для Логистической регресии:", f1_log_reg)
+print("Метод ближайших соседей:", f1_knn)
+
+# ВЫВОД
+"""
+Исходя из полученных значений, можно сделать следующие выводы:
+
+1. Для логистической регресии равен 0.7338129496402878. Это означает, что модель Logistic Regression хорошо справляется с задачей классификации и имеет высокую точность и полноту при определении классов.
+
+2. Для метода ближайших соседей равен 0.36363636363636365. Это значение ниже, чем для Logistic Regression, что может указывать на то, что модель K-Nearest Neighbors менее эффективна в данной задаче классификации.
+
+Исходя из данных, модель логистической регресии представляется более подходящей для данной задачи классификации по сравнению с моделью метода ближайших соседей.
+"""
